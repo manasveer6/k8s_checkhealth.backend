@@ -8,30 +8,6 @@ kc.loadFromDefault();
 const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 const appsV1Api = kc.makeApiClient(k8s.AppsV1Api);
 
-export const checkPodsHealth = async () => {
-  try {
-    const res = await k8sApi.listPodForAllNamespaces();
-    const podsHealth = res.body.items.map((pod) => {
-      const podName = pod.metadata?.name;
-      const namespace = pod.metadata?.namespace;
-      const conditions = pod.status?.conditions || [];
-      const readyCondition = conditions.find((cond) => cond.type === "Ready");
-      const isReady = readyCondition?.status === "True";
-
-      return {
-        podName,
-        namespace,
-        isReady,
-      };
-    });
-
-    return podsHealth;
-  } catch (err) {
-    console.error("Error fetching pod information:", err);
-    throw err;
-  }
-};
-
 export const listDeploymentsStatus = async () => {
   try {
     const res = await appsV1Api.listDeploymentForAllNamespaces();
