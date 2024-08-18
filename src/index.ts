@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { config } from "dotenv";
-// import { initCronJobs } from "./cron";
+import { initCronJobs } from "./cron/cronJobs";
 // import { listDeployments } from "./lib";
 
 // Load environment variables from .env file
@@ -10,7 +10,7 @@ const app = express();
 const port = process.env.PORT || 9087;
 
 // Initialize cron jobs
-// initCronJobs();
+initCronJobs();
 
 // Define API routes
 // app.get("/api/pods-health", async (req: Request, res: Response) => {
