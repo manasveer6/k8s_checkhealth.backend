@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "../drizzle/db";
 import {
   lastCheckResults,
@@ -20,7 +20,8 @@ export async function checkAndUpdateDeployments() {
     throw new Error("No deployments found");
   }
 
-  await db.delete(lastCheckResults).execute(); // Clear the last check results
+  // Clear the last check results and restart the ID sequence
+  await db.execute(sql`TRUNCATE TABLE last_check_results RESTART IDENTITY;`);
 
   for (const current of currentStates) {
     const last = lastResults.find(
