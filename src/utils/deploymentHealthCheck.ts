@@ -7,16 +7,20 @@ import {
 } from "../drizzle/schema";
 import { listDeploymentsStatus } from "../lib/kubernetes";
 import { v4 as uuidv4 } from "uuid";
+import { PodHealth } from "@/types";
 
-async function checkAndUpdateDeployments() {
+export async function checkAndUpdateDeployments() {
   const currentStates = await listDeploymentsStatus(); // Fetch current deployment states
   const lastResults = (await db
     .select()
     .from(lastCheckResults)) as DeploymentStatus[]; // Get last check results
+  const failedDeployments: PodHealth[] = [];
 
   if (!currentStates) {
     throw new Error("No deployments found");
   }
+
+  await db.delete(lastCheckResults).execute(); // Clear the last check results
 
   for (const current of currentStates) {
     const last = lastResults.find(
@@ -28,6 +32,11 @@ async function checkAndUpdateDeployments() {
     if (last) {
       // Check if the status has changed from "Ready" to "Not Ready"
       if (last.status === "Ready" && current.status !== "Ready") {
+        failedDeployments.push({
+          name: current.name,
+          namespace: current.namespace,
+          status: current.status,
+        });
         await logOutage(current.name, current.namespace);
       }
     }
@@ -43,6 +52,8 @@ async function checkAndUpdateDeployments() {
       })
       .onConflictDoNothing();
   }
+
+  return failedDeployments;
 }
 
 async function logOutage(deploymentName: string, namespace: string) {
