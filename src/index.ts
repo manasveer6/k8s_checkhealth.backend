@@ -35,7 +35,7 @@ app.get("/api/pods-health", async (req: Request, res: Response) => {
   console.log("Fetching pod health...");
   try {
     const deployments = await listDeploymentsStatus();
-    res.json(deployments);
+    res.status(200).json(deployments);
   } catch (error) {
     console.error("Error fetching pod health:", error);
     res.status(500).send("Internal Server Error");
