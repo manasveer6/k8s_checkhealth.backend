@@ -1,4 +1,3 @@
-// lib/htmlTableGenerator.ts
 import { PodHealth } from "@/types";
 
 export const generateHtmlTable = (deployments: PodHealth[]): string => {
