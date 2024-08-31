@@ -5,6 +5,10 @@ import { generateHtmlTable } from "../lib/htmlTableGenerator";
 import { checkAndUpdateDeployments } from "../utils/deploymentHealthCheck";
 import { PodHealth } from "@/types";
 import { sendEmail } from "../lib/mailer";
+import {
+  sendDailyReminder,
+  sendDeploymentFailureAlert,
+} from "../lib/mails/mails";
 // import { generateHtmlTable } from "../lib/htmlTableGenerator";
 // import { saveDeploymentStatuses } from "../lib/k8sDeploymentStatus";
 // import { sendEmail } from "../lib/mailer";
@@ -47,11 +51,13 @@ nodeCron.schedule("0 8 * * *", async () => {
         return;
       }
       recipientEmails.forEach(async (email) => {
-        await sendEmail(
-          email,
-          "Daily reminder for failed deployments",
-          htmlTable,
-        );
+        const res = await sendDailyReminder(email, htmlTable);
+        console.log(res);
+        // await sendEmail(
+        //   email,
+        //   "Daily reminder for failed deployments",
+        //   htmlTable,
+        // );
       });
     }
   } catch (error) {
@@ -74,7 +80,9 @@ nodeCron.schedule("*/15 * * * *", async () => {
         return;
       }
       recipientEmails.forEach(async (email) => {
-        await sendEmail(email, "Deployment Failure Detected", htmlTable);
+        const res = await sendDeploymentFailureAlert(email, htmlTable);
+        console.log(res);
+        // await sendEmail(email, "Deployment Failure Detected", htmlTable);
       });
     } else {
       console.log(new Date().toString(), "No newly failed deployments found");
