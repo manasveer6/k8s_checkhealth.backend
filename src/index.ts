@@ -9,7 +9,11 @@ config();
 
 const app = express();
 const port = process.env.PORT || 9087;
-const allowedOrigins = ["http://localhost:3000", "http://localhost:3001"];
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "https://k8s-checkhealth.vercel.app",
+];
 
 app.use(
   cors({
